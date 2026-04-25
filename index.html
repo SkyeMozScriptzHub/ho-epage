@@ -3,22 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SkyeMoz Test</title>
+<title>Search Hub</title>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   background: linear-gradient(135deg, #0f0f14, #1a1a2e);
   color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  overflow: hidden;
 }
 
-/* MAIN */
+/* CONTAINER */
 .container {
   text-align: center;
   animation: fadeUp 1s ease;
@@ -26,49 +25,67 @@ body {
 
 /* TITLE */
 h1 {
-  font-size: 40px;
+  font-size: 42px;
   margin-bottom: 20px;
+  letter-spacing: 1px;
 }
 
-/* SEARCH */
+/* SEARCH BOX */
 .search-box {
   position: relative;
 }
 
 input {
-  padding: 15px;
-  width: 300px;
-  border-radius: 30px;
+  padding: 16px 50px 16px 20px;
+  width: 350px;
+  border-radius: 40px;
   border: none;
   outline: none;
   font-size: 16px;
+  transition: 0.3s;
+}
+
+input:focus {
+  transform: scale(1.05);
+}
+
+/* BUTTON */
+button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #6c4cff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  transform: scale(1.1) rotate(10deg);
 }
 
 /* SUGGESTIONS */
 .suggestions {
   position: absolute;
   width: 100%;
-  background: #1f1f2e;
-  border-radius: 10px;
-  margin-top: 5px;
+  background: rgba(30,30,50,0.95);
+  border-radius: 12px;
+  margin-top: 8px;
+  backdrop-filter: blur(10px);
   display: none;
-  text-align: left;
+  overflow: hidden;
 }
 
 .suggestions div {
-  padding: 10px;
+  padding: 12px;
   cursor: pointer;
+  transition: 0.2s;
 }
 .suggestions div:hover {
   background: #333;
-}
-
-/* TOGGLE */
-.toggle {
-  margin-top: 15px;
-  cursor: pointer;
-  font-size: 14px;
-  opacity: 0.7;
 }
 
 /* LOADING */
@@ -78,14 +95,14 @@ input {
   left: 0;
   width: 100%;
   height: 100%;
-  background: black;
+  background: #0f0f14;
   display: none;
   justify-content: center;
   align-items: center;
-  font-size: 24px;
+  font-size: 22px;
 }
 
-/* ANIM */
+/* ANIMATION */
 @keyframes fadeUp {
   from {opacity: 0; transform: translateY(20px);}
   to {opacity: 1; transform: translateY(0);}
@@ -96,80 +113,67 @@ input {
 <body>
 
 <div class="container">
-  <h1>🔥 SkyeMoz Test Mode</h1>
+  <h1>🔎 Search Anything</h1>
 
   <div class="search-box">
-    <input id="search" placeholder="Search anything...">
+    <input id="search" placeholder="Type something...">
+    <button onclick="searchNow()">→</button>
     <div class="suggestions" id="suggestions"></div>
-  </div>
-
-  <div class="toggle" onclick="toggleMode()">
-    Mode: <span id="mode">New Tab</span>
   </div>
 </div>
 
 <div class="loading" id="loading">Loading...</div>
 
 <script>
-const data = [
-  {name: "YouTube", url: "https://youtube.com"},
-  {name: "Discord", url: "https://discord.com"},
-  {name: "Google", url: "https://google.com"},
-  {name: "SkyeMoz", url: "https://your-site.vercel.app"}
-];
+const input = document.getElementById("search");
+const suggestionsBox = document.getElementById("suggestions");
 
-let newTab = true;
-
-const search = document.getElementById("search");
-const suggestions = document.getElementById("suggestions");
-
-search.addEventListener("input", () => {
-  let value = search.value.toLowerCase();
-  suggestions.innerHTML = "";
-
-  if (!value) {
-    suggestions.style.display = "none";
+input.addEventListener("input", async () => {
+  let query = input.value;
+  if (!query) {
+    suggestionsBox.style.display = "none";
     return;
   }
 
-  let filtered = data.filter(item =>
-    item.name.toLowerCase().includes(value)
-  );
+  try {
+    // Using DuckDuckGo instant suggestions (no API key needed)
+    let res = await fetch("https://duckduckgo.com/ac/?q=" + query);
+    let data = await res.json();
 
-  filtered.forEach(item => {
-    let div = document.createElement("div");
-    div.textContent = item.name;
-    div.onclick = () => go(item.url);
-    suggestions.appendChild(div);
-  });
+    suggestionsBox.innerHTML = "";
 
-  suggestions.style.display = "block";
-});
+    data.slice(0,5).forEach(item => {
+      let div = document.createElement("div");
+      div.textContent = item.phrase;
+      div.onclick = () => goSearch(item.phrase);
+      suggestionsBox.appendChild(div);
+    });
 
-search.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    let match = data.find(item =>
-      item.name.toLowerCase().includes(search.value.toLowerCase())
-    );
-    if (match) go(match.url);
+    suggestionsBox.style.display = "block";
+  } catch {
+    suggestionsBox.style.display = "none";
   }
 });
 
-function go(url) {
+/* ENTER KEY */
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    searchNow();
+  }
+});
+
+function searchNow() {
+  let query = input.value.trim();
+  if (!query) return;
+  goSearch(query);
+}
+
+function goSearch(query) {
   document.getElementById("loading").style.display = "flex";
 
   setTimeout(() => {
-    if (newTab) {
-      window.open(url, "_blank");
-    } else {
-      window.location.href = url;
-    }
-  }, 800);
-}
-
-function toggleMode() {
-  newTab = !newTab;
-  document.getElementById("mode").textContent = newTab ? "New Tab" : "Direct";
+    window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
+  }, 700);
 }
 </script>
 
