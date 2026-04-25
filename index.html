@@ -1,286 +1,857 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Search Hub</title>
-
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #1a0f05, #0f0f14);
-  color: white;
-  overflow: hidden;
-}
+  :root{
+    --bg1:#120b06;
+    --bg2:#1a120a;
+    --bg3:#0d0d12;
+    --card: rgba(255, 255, 255, 0.08);
+    --card2: rgba(255, 255, 255, 0.12);
+    --stroke: rgba(255, 180, 120, 0.18);
+    --text: #fff7f0;
+    --muted: rgba(255,255,255,.72);
+    --orange: #ff8a3d;
+    --orange2:#ffb36b;
+    --shadow: 0 18px 60px rgba(0,0,0,.35);
+    --radius: 22px;
+  }
 
-/* PARTICLES CANVAS */
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-}
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,138,61,.18), transparent 22%),
+      radial-gradient(circle at 80% 15%, rgba(255,179,107,.12), transparent 18%),
+      radial-gradient(circle at 50% 85%, rgba(255,138,61,.10), transparent 20%),
+      linear-gradient(140deg, var(--bg1), var(--bg2) 42%, var(--bg3));
+  }
 
-/* MAIN */
-.container {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  top: 40%;
-  transform: translateY(-50%);
-  animation: fadeUp 1s ease;
-}
+  canvas#bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
 
-/* TITLE */
-h1 {
-  font-size: 42px;
-  color: #ff8c42;
-  margin-bottom: 20px;
-}
+  .wrap {
+    position: relative;
+    z-index: 1;
+    width: min(860px, calc(100vw - 28px));
+    margin: 0 auto;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: 24px 0;
+  }
 
-/* SEARCH */
-.search-box {
-  position: relative;
-  display: inline-block;
-}
+  .panel {
+    width: 100%;
+    border: 1px solid var(--stroke);
+    background: linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.06));
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+    border-radius: 28px;
+    padding: clamp(22px, 4vw, 38px);
+    transform: translateY(10px);
+    animation: floatIn .8s ease both;
+  }
 
-input {
-  padding: 16px 60px 16px 20px;
-  width: 360px;
-  border-radius: 40px;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  background: rgba(255,140,66,0.1);
-  color: white;
-  backdrop-filter: blur(10px);
-  transition: 0.3s;
-}
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(26px) scale(.985); }
+    to   { opacity: 1; transform: translateY(10px) scale(1); }
+  }
 
-input:focus {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px #ff8c42;
-}
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--orange2);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    user-select: none;
+  }
 
-/* BUTTON */
-button {
-  position: absolute;
-  right: 5px;
-  top: 5px;
-  height: 42px;
-  width: 42px;
-  border-radius: 50%;
-  border: none;
-  background: #ff8c42;
-  color: black;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-button:hover {
-  transform: rotate(20deg) scale(1.1);
-}
+  .brand .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--orange);
+    box-shadow: 0 0 18px rgba(255,138,61,.85);
+  }
 
-/* SUGGESTIONS */
-.suggestions {
-  position: absolute;
-  width: 100%;
-  background: rgba(30,20,10,0.95);
-  border-radius: 12px;
-  margin-top: 8px;
-  display: none;
-  backdrop-filter: blur(10px);
-}
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 58px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
 
-.suggestions div {
-  padding: 12px;
-  cursor: pointer;
-}
-.suggestions div:hover {
-  background: #ff8c42;
-  color: black;
-}
+  .sub {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 56ch;
+  }
 
-/* MODAL */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
+  .search-shell {
+    margin-top: 28px;
+    position: relative;
+  }
 
-.modal-box {
-  background: #1a1a1a;
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
-  animation: fadeUp 0.5s ease;
-}
+  .search-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(15, 15, 20, .34);
+    padding: 8px 8px 8px 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
 
-.modal button {
-  margin: 10px;
-  width: 140px;
-  border-radius: 10px;
-}
+  .search-row:focus-within {
+    transform: translateY(-1px);
+    border-color: rgba(255, 171, 95, .42);
+    box-shadow:
+      0 0 0 5px rgba(255,138,61,.12),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
 
-/* LOADING */
-.loading {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: #0f0f14;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-}
+  .search-icon {
+    color: var(--orange2);
+    font-size: 18px;
+    user-select: none;
+    opacity: .95;
+  }
 
-/* ANIM */
-@keyframes fadeUp {
-  from {opacity: 0; transform: translateY(20px);}
-  to {opacity: 1; transform: translateY(0);}
-}
+  input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font-size: 16px;
+    padding: 14px 2px;
+  }
+
+  input::placeholder { color: rgba(255,255,255,.45); }
+
+  .go-btn {
+    border: 0;
+    outline: 0;
+    border-radius: 999px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0 16px;
+    cursor: pointer;
+    background: linear-gradient(180deg, #ffb36b, var(--orange));
+    color: #1b0f06;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 10px 25px rgba(255,138,61,.25);
+    transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    white-space: nowrap;
+  }
+
+  .go-btn:hover {
+    transform: translateY(-1px) scale(1.02);
+    filter: brightness(1.04);
+    box-shadow: 0 14px 28px rgba(255,138,61,.32);
+  }
+
+  .go-btn:active { transform: translateY(1px) scale(.99); }
+
+  .hint-row {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: rgba(255,255,255,.58);
+    font-size: 13px;
+    align-items: center;
+  }
+
+  .chip {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: rgba(255,255,255,.82);
+    border-radius: 999px;
+    padding: 7px 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    user-select: none;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+
+  .chip:hover {
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,171,95,.3);
+  }
+
+  .suggestions {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(18, 14, 11, .95);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    transform-origin: top;
+    animation: pop .15s ease;
+    display: none;
+    z-index: 10;
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(-6px) scale(.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .suggestion-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    padding: 13px 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: background .16s ease, transform .16s ease;
+  }
+
+  .suggestion-item:hover,
+  .suggestion-item.active {
+    background: rgba(255,138,61,.14);
+  }
+
+  .suggestion-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .suggestion-ico {
+    color: var(--orange2);
+    flex: 0 0 auto;
+  }
+
+  .suggestion-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .suggestion-meta {
+    color: rgba(255,255,255,.45);
+    font-size: 12px;
+    flex: 0 0 auto;
+  }
+
+  .kbd {
+    font: inherit;
+    font-size: 11px;
+    color: rgba(255,255,255,.72);
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.06);
+    border-bottom-color: rgba(255,255,255,.22);
+    border-radius: 8px;
+    padding: 3px 7px;
+  }
+
+  .modal, .loading {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 6, 10, .68);
+    backdrop-filter: blur(12px);
+    padding: 20px;
+  }
+
+  .modal-card, .loading-card {
+    width: min(420px, 100%);
+    border: 1px solid rgba(255,255,255,.12);
+    background: linear-gradient(180deg, rgba(27, 18, 11, .96), rgba(12, 12, 18, .96));
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    animation: floatIn .25s ease both;
+  }
+
+  .modal-card h2,
+  .loading-card h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+  }
+
+  .modal-card p,
+  .loading-card p {
+    margin: 0 0 18px;
+    color: rgba(255,255,255,.68);
+    line-height: 1.5;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .action-btn {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    border-radius: 16px;
+    min-height: 52px;
+    cursor: pointer;
+    font-weight: 700;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255,138,61,.14);
+    border-color: rgba(255,171,95,.35);
+  }
+
+  .action-btn.primary {
+    background: linear-gradient(180deg, #ffb36b, var(--orange));
+    color: #1b0f06;
+    border-color: transparent;
+  }
+
+  .action-btn.primary:hover { background: linear-gradient(180deg, #ffc184, #ff913f); }
+
+  .close-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+
+  .xbtn {
+    border: 0;
+    background: transparent;
+    color: rgba(255,255,255,.7);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 10px;
+  }
+
+  .xbtn:hover { background: rgba(255,255,255,.08); }
+
+  .spinner {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.12);
+    border-top-color: var(--orange);
+    animation: spin .8s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 180px;
+  }
+
+  .small {
+    margin-top: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,.62);
+  }
+
+  .fade-out {
+    opacity: 0;
+    transform: scale(.99);
+    transition: opacity .18s ease, transform .18s ease;
+  }
+
+  @media (max-width: 560px) {
+    .panel { border-radius: 24px; }
+    .actions { grid-template-columns: 1fr; }
+    .search-row { padding-right: 6px; }
+    .go-btn { min-width: 44px; padding: 0 14px; }
+    .hint-row { gap: 8px; }
+  }
 </style>
 </head>
-
 <body>
-
 <canvas id="bg"></canvas>
 
-<div class="container">
-  <h1>🔥 Search Hub</h1>
+<div class="wrap">
+  <main class="panel">
+    <div class="brand"><span class="dot"></span> Search Hub</div>
+    <h1>Search smooth, fast, and modern.</h1>
+    <p class="sub">
+      Type a keyword, pick a suggestion, then choose whether to open it in a new tab or go directly.
+    </p>
 
-  <div class="search-box">
-    <input id="search" placeholder="🔍 Search anything...">
-    <button onclick="searchNow()">➜</button>
-    <div class="suggestions" id="suggestions"></div>
+    <div class="search-shell">
+      <div class="search-row">
+        <span class="search-icon">⌕</span>
+        <input id="search" autocomplete="off" spellcheck="false" placeholder="Try: youtube, roblox studio, among us..." />
+        <button class="go-btn" id="goBtn" type="button">Enter ↵</button>
+      </div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <div class="hint-row">
+        <span class="chip">✦ Auto-similar keywords</span>
+        <span class="chip">⏎ Enter opens options</span>
+        <span class="chip">↗ New tab / ↘ direct</span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="close-row">
+      <button class="xbtn" id="closeModal" type="button" aria-label="Close">✕</button>
+    </div>
+    <h2 id="modalTitle">Choose a selection</h2>
+    <p id="modalDesc">Open this search in a new tab, or go directly in the current tab.</p>
+    <div class="actions">
+      <button class="action-btn primary" id="newTabBtn" type="button">↗ New Tab</button>
+      <button class="action-btn" id="directBtn" type="button">↘ Direct Link</button>
+    </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <h3>Choose action</h3>
-    <button onclick="go('new')">🌐 New Tab</button>
-    <button onclick="go('direct')">➡️ Direct Link</button>
+<div class="loading" id="loading" aria-hidden="true">
+  <div class="loading-card">
+    <div class="loading-inner">
+      <div class="spinner"></div>
+      <h2>Loading…</h2>
+      <p id="loadingText">Preparing your search.</p>
+      <div class="small">Please wait a moment.</div>
+    </div>
   </div>
 </div>
-
-<div class="loading" id="loading">⚡ Loading...</div>
 
 <script>
-const input = document.getElementById("search");
-const suggestionsBox = document.getElementById("suggestions");
-let currentQuery = "";
+(() => {
+  const input = document.getElementById('search');
+  const goBtn = document.getElementById('goBtn');
+  const suggestions = document.getElementById('suggestions');
+  const modal = document.getElementById('modal');
+  const closeModalBtn = document.getElementById('closeModal');
+  const newTabBtn = document.getElementById('newTabBtn');
+  const directBtn = document.getElementById('directBtn');
+  const loading = document.getElementById('loading');
+  const loadingText = document.getElementById('loadingText');
 
-/* SUGGESTIONS */
-input.addEventListener("input", async () => {
-  let query = input.value;
-  currentQuery = query;
+  const HISTORY_KEY = 'searchhub_history_v1';
+  const MAX_HISTORY = 8;
+  const MAX_SUGGESTIONS = 7;
 
-  if (!query) {
-    suggestionsBox.style.display = "none";
-    return;
+  let currentQuery = '';
+  let pendingMode = null;   // 'new' | 'direct'
+  let pendingUrl = '';
+  let pendingWindow = null;
+  let activeIndex = -1;
+  let suggestionItems = [];
+
+  const SYMBOLS = ['⌁', '✦', '↗', '⌕', '⚡', '◌', '›'];
+
+  function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, s => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[s]));
   }
 
-  try {
-    let res = await fetch("https://duckduckgo.com/ac/?q=" + query);
-    let data = await res.json();
-
-    suggestionsBox.innerHTML = "";
-
-    data.slice(0,5).forEach(item => {
-      let div = document.createElement("div");
-      div.textContent = item.phrase;
-      div.onclick = () => openModal(item.phrase);
-      suggestionsBox.appendChild(div);
-    });
-
-    suggestionsBox.style.display = "block";
-  } catch {
-    suggestionsBox.style.display = "none";
+  function normalizeQuery(q) {
+    return q.trim().replace(/\s+/g, ' ');
   }
-});
 
-/* ENTER */
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    searchNow();
-  }
-});
-
-function searchNow() {
-  let query = input.value.trim();
-  if (!query) return;
-  openModal(query);
-}
-
-/* MODAL */
-function openModal(query) {
-  currentQuery = query;
-  document.getElementById("modal").style.display = "flex";
-}
-
-/* GO */
-function go(mode) {
-  document.getElementById("modal").style.display = "none";
-  document.getElementById("loading").style.display = "flex";
-
-  setTimeout(() => {
-    let url = "https://www.google.com/search?q=" + encodeURIComponent(currentQuery);
-
-    if (mode === "new") {
-      window.open(url, "_blank");
-    } else {
-      window.location.href = url;
+  function readHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]').filter(Boolean);
+    } catch {
+      return [];
     }
-  }, 800);
-}
+  }
 
-/* PARTICLES */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+  function saveHistory(query) {
+    const q = normalizeQuery(query);
+    if (!q) return;
+    const history = readHistory().filter(item => item.toLowerCase() !== q.toLowerCase());
+    history.unshift(q);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+  }
 
-let particles = [];
+  function makeVariants(q) {
+    const base = normalizeQuery(q);
+    if (!base) return [];
 
-for (let i = 0; i < 60; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    r: Math.random() * 2,
-    dx: Math.random() - 0.5,
-    dy: Math.random() - 0.5
+    const words = base.split(' ').filter(Boolean);
+    const first = words[0] || base;
+
+    const variants = [
+      base,
+      `${base} official`,
+      `${base} tutorial`,
+      `${base} download`,
+      `${base} guide`,
+      `${base} website`,
+      `${base} wiki`,
+      `${base} meaning`,
+      `${base} app`,
+      `${base} how to`,
+      `${first} official`,
+      `${first} search`
+    ];
+
+    if (words.length > 1) {
+      variants.push(
+        words.slice(0, -1).join(' '),
+        words.slice(1).join(' '),
+        `${words[0]} ${words[words.length - 1]}`
+      );
+    }
+
+    return [...new Set(variants.filter(Boolean))];
+  }
+
+  function buildSuggestions(query) {
+    const q = normalizeQuery(query);
+    const history = readHistory();
+    const list = [];
+
+    if (q) {
+      const variants = makeVariants(q);
+      for (const v of variants) list.push({ text: v, meta: 'suggestion' });
+
+      for (const item of history) {
+        if (item.toLowerCase().includes(q.toLowerCase()) && item.toLowerCase() !== q.toLowerCase()) {
+          list.push({ text: item, meta: 'recent' });
+        }
+      }
+    } else {
+      for (const item of history) {
+        list.push({ text: item, meta: 'recent' });
+      }
+      list.push(
+        { text: 'youtube', meta: 'popular' },
+        { text: 'discord', meta: 'popular' },
+        { text: 'roblox studio', meta: 'popular' },
+        { text: 'among us', meta: 'popular' }
+      );
+    }
+
+    const seen = new Set();
+    const out = [];
+    for (const item of list) {
+      const key = item.text.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        out.push(item);
+      }
+      if (out.length >= MAX_SUGGESTIONS) break;
+    }
+    return out;
+  }
+
+  function renderSuggestions(query) {
+    suggestionItems = buildSuggestions(query);
+    activeIndex = -1;
+
+    if (!suggestionItems.length) {
+      suggestions.style.display = 'none';
+      suggestions.innerHTML = '';
+      return;
+    }
+
+    suggestions.innerHTML = suggestionItems.map((item, index) => `
+      <button class="suggestion-item" type="button" data-index="${index}">
+        <span class="suggestion-left">
+          <span class="suggestion-ico">${SYMBOLS[index % SYMBOLS.length]}</span>
+          <span class="suggestion-text">${escapeHtml(item.text)}</span>
+        </span>
+        <span class="suggestion-meta">${escapeHtml(item.meta)}</span>
+      </button>
+    `).join('');
+
+    suggestions.style.display = 'block';
+    bindSuggestionClicks();
+    updateActiveSuggestion();
+  }
+
+  function bindSuggestionClicks() {
+    suggestions.querySelectorAll('.suggestion-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = Number(btn.dataset.index);
+        const selected = suggestionItems[index];
+        if (selected) {
+          input.value = selected.text;
+          currentQuery = selected.text;
+          openModeModal(selected.text);
+        }
+      });
+    });
+  }
+
+  function updateActiveSuggestion() {
+    suggestions.querySelectorAll('.suggestion-item').forEach((el, idx) => {
+      el.classList.toggle('active', idx === activeIndex);
+    });
+  }
+
+  function setInputValue(value) {
+    input.value = value;
+    currentQuery = value;
+    renderSuggestions(value);
+  }
+
+  function hideSuggestions() {
+    suggestions.style.display = 'none';
+  }
+
+  function openModeModal(query) {
+    currentQuery = normalizeQuery(query);
+    if (!currentQuery) return;
+    pendingUrl = 'https://www.google.com/search?q=' + encodeURIComponent(currentQuery);
+    pendingMode = null;
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    hideSuggestions();
+  }
+
+  function closeModeModal() {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function showLoading(text) {
+    loadingText.textContent = text || 'Preparing your search.';
+    loading.style.display = 'flex';
+    loading.setAttribute('aria-hidden', 'false');
+  }
+
+  function hideLoading() {
+    loading.style.display = 'none';
+    loading.setAttribute('aria-hidden', 'true');
+  }
+
+  function navigate(mode) {
+    const url = pendingUrl || ('https://www.google.com/search?q=' + encodeURIComponent(currentQuery));
+    if (!currentQuery) return;
+
+    closeModeModal();
+    showLoading(mode === 'new' ? 'Opening a new tab…' : 'Going directly…');
+    saveHistory(currentQuery);
+
+    // Fix: open the new tab synchronously so the browser does not block it.
+    if (mode === 'new') {
+      pendingWindow = window.open('about:blank', '_blank', 'noopener,noreferrer');
+    } else {
+      pendingWindow = null;
+    }
+
+    setTimeout(() => {
+      if (mode === 'new') {
+        if (pendingWindow) {
+          pendingWindow.location.href = url;
+        } else {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      } else {
+        window.location.href = url;
+      }
+    }, 350);
+  }
+
+  function submitSearch() {
+    const q = normalizeQuery(input.value);
+    if (!q) return;
+    currentQuery = q;
+    input.value = q;
+    openModeModal(q);
+  }
+
+  input.addEventListener('input', () => {
+    const q = normalizeQuery(input.value);
+    currentQuery = q;
+    renderSuggestions(q);
   });
-}
 
-function animate() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  input.addEventListener('focus', () => renderSuggestions(input.value));
 
-  particles.forEach(p => {
-    p.x += p.dx;
-    p.y += p.dy;
+  input.addEventListener('keydown', (e) => {
+    const hasSuggestions = suggestions.style.display === 'block' && suggestionItems.length > 0;
 
-    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    if (e.key === 'ArrowDown' && hasSuggestions) {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % suggestionItems.length;
+      updateActiveSuggestion();
+      return;
+    }
 
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-    ctx.fillStyle = "#ff8c42";
-    ctx.fill();
+    if (e.key === 'ArrowUp' && hasSuggestions) {
+      e.preventDefault();
+      activeIndex = activeIndex <= 0 ? suggestionItems.length - 1 : activeIndex - 1;
+      updateActiveSuggestion();
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (hasSuggestions && activeIndex >= 0 && suggestionItems[activeIndex]) {
+        const picked = suggestionItems[activeIndex].text;
+        input.value = picked;
+        currentQuery = picked;
+        openModeModal(picked);
+      } else {
+        submitSearch();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      hideSuggestions();
+      closeModeModal();
+      hideLoading();
+    }
   });
 
-  requestAnimationFrame(animate);
-}
-animate();
+  goBtn.addEventListener('click', submitSearch);
+  newTabBtn.addEventListener('click', () => navigate('new'));
+  directBtn.addEventListener('click', () => navigate('direct'));
+  closeModalBtn.addEventListener('click', closeModeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModeModal();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-shell')) hideSuggestions();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModeModal();
+      hideLoading();
+    }
+  });
+
+  // Particles with slight connecting lines for a smoother modern look.
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
+  let w = canvas.width = window.innerWidth;
+  let h = canvas.height = window.innerHeight;
+
+  const particles = [];
+  const COUNT = Math.min(72, Math.floor((w * h) / 22000));
+
+  function rand(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function createParticle() {
+    return {
+      x: rand(0, w),
+      y: rand(0, h),
+      r: rand(1, 2.4),
+      vx: rand(-0.25, 0.25),
+      vy: rand(-0.2, 0.2),
+      alpha: rand(0.28, 0.9)
+    };
+  }
+
+  for (let i = 0; i < COUNT; i++) particles.push(createParticle());
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < -10) p.x = w + 10;
+      if (p.x > w + 10) p.x = -10;
+      if (p.y < -10) p.y = h + 10;
+      if (p.y > h + 10) p.y = -10;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 149, 74, ${p.alpha})`;
+      ctx.fill();
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i];
+        const b = particles[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(255, 138, 61, ${(1 - dist / 120) * 0.16})`;
+          ctx.lineWidth = 1;
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  window.addEventListener('resize', () => {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  });
+
+  // Start with a subtle placeholder list.
+  renderSuggestions('');
+})();
 </script>
-
 </body>
 </html>
