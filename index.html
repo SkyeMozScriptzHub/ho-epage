@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Search Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Search Hub V3</title>
 <style>
   :root{
     --bg1:#120b06;
@@ -21,10 +21,12 @@
   }
 
   * { box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    overflow: hidden;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     color: var(--text);
     font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     background:
@@ -41,72 +43,128 @@
     pointer-events: none;
   }
 
-  .wrap {
+  .page {
     position: relative;
     z-index: 1;
-    width: min(860px, calc(100vw - 28px));
+    width: min(1180px, calc(100vw - 24px));
     margin: 0 auto;
-    min-height: 100svh;
-    display: grid;
-    place-items: center;
-    padding: 24px 0;
+    padding: 18px 0 40px;
   }
 
-  .panel {
-    width: 100%;
+  .topbar {
+    position: sticky;
+    top: 12px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(10, 10, 16, .56);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .brand-mark {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--orange);
+    box-shadow: 0 0 18px rgba(255,138,61,.85);
+    flex: 0 0 auto;
+  }
+
+  .brand-text {
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--orange2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .mini-btn {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 9px 13px;
+    cursor: pointer;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+
+  .mini-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255,138,61,.14);
+    border-color: rgba(255,171,95,.35);
+  }
+
+  .hero {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+    margin-bottom: 18px;
     border: 1px solid var(--stroke);
-    background: linear-gradient(180deg, rgba(255,255,255,.11), rgba(255,255,255,.06));
+    background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
     backdrop-filter: blur(18px);
     box-shadow: var(--shadow);
     border-radius: 28px;
-    padding: clamp(22px, 4vw, 38px);
-    transform: translateY(10px);
     animation: floatIn .8s ease both;
   }
 
   @keyframes floatIn {
-    from { opacity: 0; transform: translateY(26px) scale(.985); }
-    to   { opacity: 1; transform: translateY(10px) scale(1); }
+    from { opacity: 0; transform: translateY(24px) scale(.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
+  .eyebrow {
     color: var(--orange2);
+    font-size: 12px;
+    font-weight: 800;
     letter-spacing: .08em;
     text-transform: uppercase;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    user-select: none;
-  }
-
-  .brand .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: var(--orange);
-    box-shadow: 0 0 18px rgba(255,138,61,.85);
   }
 
   h1 {
     margin: 0;
-    font-size: clamp(34px, 5vw, 58px);
+    font-size: clamp(30px, 5vw, 58px);
     line-height: 1.02;
     letter-spacing: -0.03em;
   }
 
   .sub {
-    margin: 12px 0 0;
+    margin: 0;
     color: var(--muted);
+    line-height: 1.55;
+    max-width: 70ch;
     font-size: 15px;
-    line-height: 1.5;
-    max-width: 56ch;
   }
 
   .search-shell {
-    margin-top: 28px;
+    margin-top: 8px;
     position: relative;
   }
 
@@ -136,9 +194,14 @@
     font-size: 18px;
     user-select: none;
     opacity: .95;
+    flex: 0 0 auto;
   }
 
-  input {
+  input, textarea {
+    font: inherit;
+  }
+
+  .search-input {
     width: 100%;
     border: 0;
     outline: 0;
@@ -146,9 +209,10 @@
     color: var(--text);
     font-size: 16px;
     padding: 14px 2px;
+    min-width: 0;
   }
 
-  input::placeholder { color: rgba(255,255,255,.45); }
+  .search-input::placeholder { color: rgba(255,255,255,.45); }
 
   .go-btn {
     border: 0;
@@ -177,35 +241,6 @@
   }
 
   .go-btn:active { transform: translateY(1px) scale(.99); }
-
-  .hint-row {
-    margin-top: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    color: rgba(255,255,255,.58);
-    font-size: 13px;
-    align-items: center;
-  }
-
-  .chip {
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.05);
-    color: rgba(255,255,255,.82);
-    border-radius: 999px;
-    padding: 7px 11px;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    user-select: none;
-    transition: transform .18s ease, background .18s ease, border-color .18s ease;
-  }
-
-  .chip:hover {
-    transform: translateY(-1px);
-    background: rgba(255,255,255,.08);
-    border-color: rgba(255,171,95,.3);
-  }
 
   .suggestions {
     position: absolute;
@@ -273,15 +308,269 @@
     flex: 0 0 auto;
   }
 
-  .kbd {
-    font: inherit;
-    font-size: 11px;
-    color: rgba(255,255,255,.72);
-    border: 1px solid rgba(255,255,255,.14);
+  .hint-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: rgba(255,255,255,.58);
+    font-size: 13px;
+    align-items: center;
+  }
+
+  .chip {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: rgba(255,255,255,.82);
+    border-radius: 999px;
+    padding: 7px 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    user-select: none;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  }
+
+  .chip:hover {
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,171,95,.3);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr .9fr;
+    gap: 18px;
+    margin-top: 18px;
+  }
+
+  .section {
+    border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.06);
-    border-bottom-color: rgba(255,255,255,.22);
-    border-radius: 8px;
-    padding: 3px 7px;
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .section-head {
+    padding: 18px 18px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .section-sub {
+    margin: 8px 0 0;
+    color: rgba(255,255,255,.68);
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  .section-body {
+    padding: 18px;
+  }
+
+  .form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .field {
+    display: grid;
+    gap: 8px;
+  }
+
+  .label {
+    font-size: 13px;
+    color: rgba(255,255,255,.78);
+    font-weight: 700;
+  }
+
+  .field-input {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(10, 10, 16, .34);
+    color: var(--text);
+    border-radius: 16px;
+    padding: 13px 14px;
+    outline: none;
+    transition: border-color .16s ease, box-shadow .16s ease;
+  }
+
+  .field-input:focus {
+    border-color: rgba(255,171,95,.42);
+    box-shadow: 0 0 0 4px rgba(255,138,61,.10);
+  }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .file-btn {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 11px 14px;
+    cursor: pointer;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .file-btn input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .preview {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.08);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .action {
+    border: 0;
+    border-radius: 16px;
+    min-height: 46px;
+    padding: 0 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .16s ease, filter .16s ease, background .16s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .action:hover { transform: translateY(-1px); }
+
+  .action.primary {
+    background: linear-gradient(180deg, #ffb36b, var(--orange));
+    color: #1b0f06;
+  }
+
+  .action.ghost {
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,.12);
+  }
+
+  .shortcuts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .shortcut {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(10, 10, 16, .28);
+    border-radius: 20px;
+    padding: 12px;
+    overflow: hidden;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+
+  .shortcut:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,171,95,.28);
+    background: rgba(255,255,255,.08);
+  }
+
+  .shortcut-top {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .shortcut-img {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.08);
+    flex: 0 0 auto;
+  }
+
+  .shortcut-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shortcut-link {
+    margin: 4px 0 0;
+    color: rgba(255,255,255,.65);
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .shortcut-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tiny {
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform .16s ease, background .16s ease, border-color .16s ease;
+  }
+
+  .tiny:hover {
+    transform: translateY(-1px);
+    background: rgba(255,138,61,.14);
+    border-color: rgba(255,171,95,.35);
+  }
+
+  .empty {
+    color: rgba(255,255,255,.58);
+    text-align: center;
+    padding: 18px 8px 6px;
+    line-height: 1.5;
   }
 
   .modal, .loading {
@@ -297,7 +586,7 @@
   }
 
   .modal-card, .loading-card {
-    width: min(420px, 100%);
+    width: min(460px, 100%);
     border: 1px solid rgba(255,255,255,.12);
     background: linear-gradient(180deg, rgba(27, 18, 11, .96), rgba(12, 12, 18, .96));
     border-radius: 22px;
@@ -404,42 +693,169 @@
     transition: opacity .18s ease, transform .18s ease;
   }
 
-  @media (max-width: 560px) {
-    .panel { border-radius: 24px; }
-    .actions { grid-template-columns: 1fr; }
-    .search-row { padding-right: 6px; }
-    .go-btn { min-width: 44px; padding: 0 14px; }
-    .hint-row { gap: 8px; }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .shortcuts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .page { width: min(100vw - 16px, 1180px); }
+    .topbar {
+      top: 8px;
+      padding: 10px 12px;
+      border-radius: 18px;
+    }
+    .hero,
+    .section {
+      border-radius: 22px;
+    }
+    .hero {
+      padding: 18px;
+    }
+    .section-head,
+    .section-body {
+      padding-left: 14px;
+      padding-right: 14px;
+    }
+    .search-row {
+      padding: 8px 8px 8px 12px;
+    }
+    .go-btn {
+      min-width: 44px;
+      padding: 0 14px;
+    }
+    .row-2 {
+      grid-template-columns: 1fr;
+    }
+    .actions {
+      grid-template-columns: 1fr;
+    }
+    .nav-actions {
+      gap: 8px;
+    }
+    .mini-btn {
+      padding: 8px 11px;
+    }
   }
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 
-<div class="wrap">
-  <main class="panel">
-    <div class="brand"><span class="dot"></span> Search Hub</div>
-    <h1>Search smooth, fast, and modern.</h1>
+<div class="page">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <span class="brand-text">Search Hub</span>
+    </div>
+    <div class="nav-actions">
+      <button class="mini-btn" id="jumpSearch" type="button">⌕ Search</button>
+      <button class="mini-btn" id="jumpShortcuts" type="button">⚡ Shortcuts</button>
+      <button class="mini-btn" id="openShortcutModal" type="button">＋ Add</button>
+    </div>
+  </header>
+
+  <main class="hero">
+    <div class="eyebrow">Modern search + shortcuts</div>
+    <h1>Search smooth, save shortcuts, and move fast.</h1>
     <p class="sub">
-      Type a keyword, pick a suggestion, then choose whether to open it in a new tab or go directly.
+      Type anything, pick a similar suggestion, then choose new tab or direct link.
+      You can also make custom shortcut cards with your own image, name, and URL.
     </p>
 
-    <div class="search-shell">
+    <div class="search-shell" id="searchSection">
       <div class="search-row">
         <span class="search-icon">⌕</span>
-        <input id="search" autocomplete="off" spellcheck="false" placeholder="Try: youtube, roblox studio, among us..." />
+        <input id="search" class="search-input" autocomplete="off" spellcheck="false" placeholder="Try: youtube, roblox studio, among us..." />
         <button class="go-btn" id="goBtn" type="button">Enter ↵</button>
       </div>
 
       <div class="suggestions" id="suggestions"></div>
 
-      <div class="hint-row">
+      <div class="hint-row" style="margin-top: 12px;">
         <span class="chip">✦ Auto-similar keywords</span>
         <span class="chip">⏎ Enter opens options</span>
         <span class="chip">↗ New tab / ↘ direct</span>
+        <span class="chip">⛔ Cancel loading anytime</span>
       </div>
     </div>
   </main>
+
+  <div class="grid">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Search mode</h2>
+          <p class="section-sub">Suggestions use your search text and recent history, so it feels automatic instead of fixed.</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="empty">
+          Use the search bar above. Arrow keys move suggestions, Enter opens the choice modal, and Esc closes things.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="shortcutsSection">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">Shortcut mode</h2>
+          <p class="section-sub">Save custom cards with a name, link, and image. Images use your media picker and are saved locally.</p>
+        </div>
+      </div>
+
+      <div class="section-body">
+        <form class="form" id="shortcutForm">
+          <div class="row-2">
+            <div class="field">
+              <div class="label">Shortcut name</div>
+              <input class="field-input" id="shortcutName" maxlength="28" placeholder="Example: YouTube" />
+            </div>
+            <div class="field">
+              <div class="label">Link</div>
+              <input class="field-input" id="shortcutUrl" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="label">Image</div>
+            <div class="picker-wrap">
+              <label class="file-btn">
+                ⬆ Pick image
+                <input id="shortcutImage" type="file" accept="image/*" />
+              </label>
+              <img id="imagePreview" class="preview" alt="Preview" />
+              <span id="imageHint" style="color: rgba(255,255,255,.65); font-size: 13px;">No image selected yet.</span>
+            </div>
+          </div>
+
+          <input type="hidden" id="editingId" />
+
+          <div class="form-actions">
+            <button class="action primary" type="submit" id="saveShortcut">＋ Save shortcut</button>
+            <button class="action ghost" type="button" id="clearForm">↺ Clear</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <section class="section" style="margin-top:18px;">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Saved shortcuts</h2>
+        <p class="section-sub">Tap open, edit, or delete. This list scrolls with the page, so mobile stays usable.</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="shortcuts-grid" id="shortcutsGrid"></div>
+      <div class="empty" id="shortcutsEmpty" style="display:none;">No shortcuts yet. Add one above with an image and link.</div>
+    </div>
+  </section>
 </div>
 
 <div class="modal" id="modal" aria-hidden="true">
@@ -462,56 +878,94 @@
       <div class="spinner"></div>
       <h2>Loading…</h2>
       <p id="loadingText">Preparing your search.</p>
-      <div class="small">Please wait a moment.</div>
+      <div class="small">Press Cancel to undo before it opens.</div>
+      <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; justify-content:center;">
+        <button class="action-btn" id="cancelLoading" type="button">⛔ Cancel</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  const input = document.getElementById('search');
-  const goBtn = document.getElementById('goBtn');
-  const suggestions = document.getElementById('suggestions');
-  const modal = document.getElementById('modal');
-  const closeModalBtn = document.getElementById('closeModal');
-  const newTabBtn = document.getElementById('newTabBtn');
-  const directBtn = document.getElementById('directBtn');
-  const loading = document.getElementById('loading');
-  const loadingText = document.getElementById('loadingText');
+  const $ = (id) => document.getElementById(id);
+
+  const input = $('search');
+  const goBtn = $('goBtn');
+  const suggestions = $('suggestions');
+  const modal = $('modal');
+  const closeModalBtn = $('closeModal');
+  const newTabBtn = $('newTabBtn');
+  const directBtn = $('directBtn');
+  const loading = $('loading');
+  const loadingText = $('loadingText');
+  const cancelLoadingBtn = $('cancelLoading');
+
+  const jumpSearch = $('jumpSearch');
+  const jumpShortcuts = $('jumpShortcuts');
+  const openShortcutModal = $('openShortcutModal');
+
+  const shortcutForm = $('shortcutForm');
+  const shortcutName = $('shortcutName');
+  const shortcutUrl = $('shortcutUrl');
+  const shortcutImage = $('shortcutImage');
+  const imagePreview = $('imagePreview');
+  const imageHint = $('imageHint');
+  const editingId = $('editingId');
+  const clearForm = $('clearForm');
+  const shortcutsGrid = $('shortcutsGrid');
+  const shortcutsEmpty = $('shortcutsEmpty');
 
   const HISTORY_KEY = 'searchhub_history_v1';
+  const SHORTCUTS_KEY = 'searchhub_shortcuts_v1';
   const MAX_HISTORY = 8;
   const MAX_SUGGESTIONS = 7;
 
   let currentQuery = '';
-  let pendingMode = null;   // 'new' | 'direct'
   let pendingUrl = '';
+  let pendingMode = null;
   let pendingWindow = null;
+  let pendingTimer = null;
   let activeIndex = -1;
   let suggestionItems = [];
+  let currentImageData = '';
 
   const SYMBOLS = ['⌁', '✦', '↗', '⌕', '⚡', '◌', '›'];
 
-  function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, s => ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#39;'
-    }[s]));
+  function normalizeQuery(q) {
+    return (q || '').trim().replace(/\s+/g, ' ');
   }
 
-  function normalizeQuery(q) {
-    return q.trim().replace(/\s+/g, ' ');
+  function isValidUrl(u) {
+    try {
+      const url = new URL(u);
+      return ['http:', 'https:'].includes(url.protocol);
+    } catch {
+      return false;
+    }
+  }
+
+  function normalizeUrl(u) {
+    const value = (u || '').trim();
+    if (!value) return '';
+    if (/^https?:\/\//i.test(value)) return value;
+    return 'https://' + value;
+  }
+
+  function readJSON(key, fallback) {
+    try {
+      return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback));
+    } catch {
+      return fallback;
+    }
+  }
+
+  function writeJSON(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
   }
 
   function readHistory() {
-    try {
-      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]').filter(Boolean);
-    } catch {
-      return [];
-    }
+    return readJSON(HISTORY_KEY, []).filter(Boolean);
   }
 
   function saveHistory(query) {
@@ -519,7 +973,15 @@
     if (!q) return;
     const history = readHistory().filter(item => item.toLowerCase() !== q.toLowerCase());
     history.unshift(q);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+    writeJSON(HISTORY_KEY, history.slice(0, MAX_HISTORY));
+  }
+
+  function loadShortcuts() {
+    return readJSON(SHORTCUTS_KEY, []);
+  }
+
+  function saveShortcuts(shortcuts) {
+    writeJSON(SHORTCUTS_KEY, shortcuts);
   }
 
   function makeVariants(q) {
@@ -555,6 +1017,17 @@
     return [...new Set(variants.filter(Boolean))];
   }
 
+  function shortcutSuggestions(query) {
+    const q = normalizeQuery(query).toLowerCase();
+    const shortcuts = loadShortcuts();
+    if (!q) return shortcuts.slice(0, MAX_SUGGESTIONS).map(s => ({ text: s.name, meta: 'shortcut', url: s.url }));
+
+    return shortcuts
+      .filter(s => s.name.toLowerCase().includes(q) || s.url.toLowerCase().includes(q))
+      .slice(0, MAX_SUGGESTIONS)
+      .map(s => ({ text: s.name, meta: 'shortcut', url: s.url }));
+  }
+
   function buildSuggestions(query) {
     const q = normalizeQuery(query);
     const history = readHistory();
@@ -564,15 +1037,16 @@
       const variants = makeVariants(q);
       for (const v of variants) list.push({ text: v, meta: 'suggestion' });
 
+      for (const s of shortcutSuggestions(q)) list.push(s);
+
       for (const item of history) {
         if (item.toLowerCase().includes(q.toLowerCase()) && item.toLowerCase() !== q.toLowerCase()) {
           list.push({ text: item, meta: 'recent' });
         }
       }
     } else {
-      for (const item of history) {
-        list.push({ text: item, meta: 'recent' });
-      }
+      for (const item of history) list.push({ text: item, meta: 'recent' });
+      for (const s of loadShortcuts().slice(0, 4)) list.push({ text: s.name, meta: 'shortcut', url: s.url });
       list.push(
         { text: 'youtube', meta: 'popular' },
         { text: 'discord', meta: 'popular' },
@@ -619,12 +1093,29 @@
     updateActiveSuggestion();
   }
 
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[s]));
+  }
+
   function bindSuggestionClicks() {
     suggestions.querySelectorAll('.suggestion-item').forEach(btn => {
       btn.addEventListener('click', () => {
         const index = Number(btn.dataset.index);
         const selected = suggestionItems[index];
-        if (selected) {
+        if (!selected) return;
+
+        if (selected.url) {
+          currentQuery = selected.text;
+          input.value = selected.text;
+          pendingUrl = selected.url;
+          openModeModal(selected.text, selected.url);
+        } else {
           input.value = selected.text;
           currentQuery = selected.text;
           openModeModal(selected.text);
@@ -639,20 +1130,14 @@
     });
   }
 
-  function setInputValue(value) {
-    input.value = value;
-    currentQuery = value;
-    renderSuggestions(value);
-  }
-
   function hideSuggestions() {
     suggestions.style.display = 'none';
   }
 
-  function openModeModal(query) {
+  function openModeModal(query, directUrl = '') {
     currentQuery = normalizeQuery(query);
-    if (!currentQuery) return;
-    pendingUrl = 'https://www.google.com/search?q=' + encodeURIComponent(currentQuery);
+    if (!currentQuery && !directUrl) return;
+    pendingUrl = directUrl || ('https://www.google.com/search?q=' + encodeURIComponent(currentQuery));
     pendingMode = null;
     modal.style.display = 'flex';
     modal.setAttribute('aria-hidden', 'false');
@@ -675,41 +1160,168 @@
     loading.setAttribute('aria-hidden', 'true');
   }
 
+  function cancelPendingAction() {
+    if (pendingTimer) {
+      clearTimeout(pendingTimer);
+      pendingTimer = null;
+    }
+    if (pendingWindow && !pendingWindow.closed) {
+      try { pendingWindow.close(); } catch {}
+    }
+    pendingWindow = null;
+    pendingMode = null;
+    hideLoading();
+  }
+
   function navigate(mode) {
     const url = pendingUrl || ('https://www.google.com/search?q=' + encodeURIComponent(currentQuery));
-    if (!currentQuery) return;
+    if (!currentQuery && !pendingUrl) return;
 
     closeModeModal();
     showLoading(mode === 'new' ? 'Opening a new tab…' : 'Going directly…');
-    saveHistory(currentQuery);
+    saveHistory(currentQuery || url);
 
-    // Fix: open the new tab synchronously so the browser does not block it.
+    if (pendingTimer) {
+      clearTimeout(pendingTimer);
+      pendingTimer = null;
+    }
+    if (pendingWindow && !pendingWindow.closed) {
+      try { pendingWindow.close(); } catch {}
+    }
+    pendingWindow = null;
+
+    pendingMode = mode;
+
     if (mode === 'new') {
       pendingWindow = window.open('about:blank', '_blank', 'noopener,noreferrer');
-    } else {
-      pendingWindow = null;
     }
 
-    setTimeout(() => {
+    pendingTimer = setTimeout(() => {
+      pendingTimer = null;
+
       if (mode === 'new') {
         if (pendingWindow) {
-          pendingWindow.location.href = url;
+          try {
+            pendingWindow.location.href = url;
+          } catch {
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }
         } else {
           window.open(url, '_blank', 'noopener,noreferrer');
         }
       } else {
         window.location.href = url;
       }
-    }, 350);
+    }, 450);
   }
 
   function submitSearch() {
     const q = normalizeQuery(input.value);
     if (!q) return;
+
+    const match = loadShortcuts().find(s => s.name.toLowerCase() === q.toLowerCase());
+    if (match && isValidUrl(match.url)) {
+      openModeModal(match.name, match.url);
+      return;
+    }
+
     currentQuery = q;
     input.value = q;
     openModeModal(q);
   }
+
+  function renderShortcuts() {
+    const shortcuts = loadShortcuts();
+    shortcutsGrid.innerHTML = '';
+
+    if (!shortcuts.length) {
+      shortcutsEmpty.style.display = 'block';
+      return;
+    }
+
+    shortcutsEmpty.style.display = 'none';
+
+    shortcuts.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'shortcut';
+      card.innerHTML = `
+        <div class="shortcut-top">
+          <img class="shortcut-img" src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.name)}" />
+          <div style="min-width:0">
+            <h3 class="shortcut-title" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</h3>
+            <p class="shortcut-link" title="${escapeHtml(item.url)}">${escapeHtml(item.url)}</p>
+          </div>
+        </div>
+        <div class="shortcut-actions">
+          <button class="tiny" data-open>↗ Open</button>
+          <button class="tiny" data-edit>✎ Edit</button>
+          <button class="tiny" data-delete>🗑 Delete</button>
+        </div>
+      `;
+
+      card.querySelector('[data-open]').addEventListener('click', () => {
+        openModeModal(item.name, item.url);
+      });
+
+      card.querySelector('[data-edit]').addEventListener('click', () => {
+        fillShortcutForm(item);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      card.querySelector('[data-delete]').addEventListener('click', () => {
+        const next = loadShortcuts().filter(s => s.id !== item.id);
+        saveShortcuts(next);
+        renderShortcuts();
+        renderSuggestions(input.value);
+      });
+
+      shortcutsGrid.appendChild(card);
+    });
+  }
+
+  function resetForm() {
+    shortcutForm.reset();
+    editingId.value = '';
+    currentImageData = '';
+    imagePreview.removeAttribute('src');
+    imageHint.textContent = 'No image selected yet.';
+  }
+
+  function fillShortcutForm(item) {
+    editingId.value = item.id;
+    shortcutName.value = item.name || '';
+    shortcutUrl.value = item.url || '';
+    currentImageData = item.image || '';
+    if (currentImageData) {
+      imagePreview.src = currentImageData;
+      imageHint.textContent = 'Image ready to save.';
+    } else {
+      imagePreview.removeAttribute('src');
+      imageHint.textContent = 'No image selected yet.';
+    }
+    openShortcutEditor();
+  }
+
+  function openShortcutEditor() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    shortcutName.focus();
+  }
+
+  function openShortcutSection() {
+    document.getElementById('shortcutsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  jumpSearch.addEventListener('click', () => {
+    document.getElementById('searchSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => input.focus(), 250);
+  });
+
+  jumpShortcuts.addEventListener('click', openShortcutSection);
+  openShortcutModal.addEventListener('click', () => {
+    resetForm();
+    openShortcutSection();
+    setTimeout(() => shortcutName.focus(), 250);
+  });
 
   input.addEventListener('input', () => {
     const q = normalizeQuery(input.value);
@@ -739,10 +1351,14 @@
     if (e.key === 'Enter') {
       e.preventDefault();
       if (hasSuggestions && activeIndex >= 0 && suggestionItems[activeIndex]) {
-        const picked = suggestionItems[activeIndex].text;
-        input.value = picked;
-        currentQuery = picked;
-        openModeModal(picked);
+        const picked = suggestionItems[activeIndex];
+        input.value = picked.text;
+        currentQuery = picked.text;
+        if (picked.url) {
+          openModeModal(picked.text, picked.url);
+        } else {
+          openModeModal(picked.text);
+        }
       } else {
         submitSearch();
       }
@@ -760,9 +1376,14 @@
   newTabBtn.addEventListener('click', () => navigate('new'));
   directBtn.addEventListener('click', () => navigate('direct'));
   closeModalBtn.addEventListener('click', closeModeModal);
+  cancelLoadingBtn.addEventListener('click', cancelPendingAction);
 
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModeModal();
+  });
+
+  loading.addEventListener('click', (e) => {
+    if (e.target === loading) cancelPendingAction();
   });
 
   document.addEventListener('click', (e) => {
@@ -776,81 +1397,134 @@
     }
   });
 
-  // Particles with slight connecting lines for a smoother modern look.
-  const canvas = document.getElementById('bg');
-  const ctx = canvas.getContext('2d');
-  let w = canvas.width = window.innerWidth;
-  let h = canvas.height = window.innerHeight;
+  shortcutImage.addEventListener('change', () => {
+    const file = shortcutImage.files && shortcutImage.files[0];
+    if (!file) return;
 
-  const particles = [];
-  const COUNT = Math.min(72, Math.floor((w * h) / 22000));
-
-  function rand(min, max) {
-    return Math.random() * (max - min) + min;
-  }
-
-  function createParticle() {
-    return {
-      x: rand(0, w),
-      y: rand(0, h),
-      r: rand(1, 2.4),
-      vx: rand(-0.25, 0.25),
-      vy: rand(-0.2, 0.2),
-      alpha: rand(0.28, 0.9)
+    const reader = new FileReader();
+    reader.onload = () => {
+      currentImageData = String(reader.result || '');
+      imagePreview.src = currentImageData;
+      imageHint.textContent = 'Image ready to save.';
     };
-  }
-
-  for (let i = 0; i < COUNT; i++) particles.push(createParticle());
-
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
-
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-
-      if (p.x < -10) p.x = w + 10;
-      if (p.x > w + 10) p.x = -10;
-      if (p.y < -10) p.y = h + 10;
-      if (p.y > h + 10) p.y = -10;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255, 149, 74, ${p.alpha})`;
-      ctx.fill();
-    }
-
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const a = particles[i];
-        const b = particles[j];
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(255, 138, 61, ${(1 - dist / 120) * 0.16})`;
-          ctx.lineWidth = 1;
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
-        }
-      }
-    }
-
-    requestAnimationFrame(draw);
-  }
-  draw();
-
-  window.addEventListener('resize', () => {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
+    reader.readAsDataURL(file);
   });
 
-  // Start with a subtle placeholder list.
+  shortcutForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const name = normalizeQuery(shortcutName.value);
+    const rawUrl = normalizeQuery(shortcutUrl.value);
+    const url = normalizeUrl(rawUrl);
+
+    if (!name || !rawUrl || !isValidUrl(url)) {
+      imageHint.textContent = 'Please enter a valid name and URL.';
+      return;
+    }
+
+    const shortcuts = loadShortcuts();
+    const id = editingId.value || String(Date.now());
+
+    const item = {
+      id,
+      name,
+      url,
+      image: currentImageData || '',
+      createdAt: Date.now()
+    };
+
+    const index = shortcuts.findIndex(s => s.id === id);
+    if (index >= 0) shortcuts[index] = item;
+    else shortcuts.unshift(item);
+
+    saveShortcuts(shortcuts);
+    renderShortcuts();
+    renderSuggestions(input.value);
+    resetForm();
+    openShortcutSection();
+  });
+
+  clearForm.addEventListener('click', resetForm);
+
+  function startParticles() {
+    const canvas = $('bg');
+    const ctx = canvas.getContext('2d');
+
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+
+    const particles = [];
+    const count = Math.min(72, Math.floor((w * h) / 22000));
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createParticle() {
+      return {
+        x: rand(0, w),
+        y: rand(0, h),
+        r: rand(1, 2.4),
+        vx: rand(-0.25, 0.25),
+        vy: rand(-0.2, 0.2),
+        alpha: rand(0.28, 0.9)
+      };
+    }
+
+    for (let i = 0; i < count; i++) particles.push(createParticle());
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < -10) p.x = w + 10;
+        if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        if (p.y > h + 10) p.y = -10;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 149, 74, ${p.alpha})`;
+        ctx.fill();
+      }
+
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i];
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 138, 61, ${(1 - dist / 120) * 0.16})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    window.addEventListener('resize', () => {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    });
+  }
+
+  renderShortcuts();
   renderSuggestions('');
+  startParticles();
 })();
 </script>
 </body>
