@@ -9,44 +9,58 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #0f0f14, #1a1a2e);
+  background: radial-gradient(circle at top, #1a0f05, #0f0f14);
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  overflow: hidden;
 }
 
-/* CONTAINER */
+/* PARTICLES CANVAS */
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* MAIN */
 .container {
+  position: relative;
+  z-index: 1;
   text-align: center;
+  top: 40%;
+  transform: translateY(-50%);
   animation: fadeUp 1s ease;
 }
 
 /* TITLE */
 h1 {
   font-size: 42px;
+  color: #ff8c42;
   margin-bottom: 20px;
-  letter-spacing: 1px;
 }
 
-/* SEARCH BOX */
+/* SEARCH */
 .search-box {
   position: relative;
+  display: inline-block;
 }
 
 input {
-  padding: 16px 50px 16px 20px;
-  width: 350px;
+  padding: 16px 60px 16px 20px;
+  width: 360px;
   border-radius: 40px;
   border: none;
   outline: none;
   font-size: 16px;
+  background: rgba(255,140,66,0.1);
+  color: white;
+  backdrop-filter: blur(10px);
   transition: 0.3s;
 }
 
 input:focus {
   transform: scale(1.05);
+  box-shadow: 0 0 15px #ff8c42;
 }
 
 /* BUTTON */
@@ -54,45 +68,70 @@ button {
   position: absolute;
   right: 5px;
   top: 5px;
-  height: 40px;
-  width: 40px;
+  height: 42px;
+  width: 42px;
   border-radius: 50%;
   border: none;
-  background: #6c4cff;
-  color: white;
+  background: #ff8c42;
+  color: black;
+  font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
 }
 button:hover {
-  transform: scale(1.1) rotate(10deg);
+  transform: rotate(20deg) scale(1.1);
 }
 
 /* SUGGESTIONS */
 .suggestions {
   position: absolute;
   width: 100%;
-  background: rgba(30,30,50,0.95);
+  background: rgba(30,20,10,0.95);
   border-radius: 12px;
   margin-top: 8px;
-  backdrop-filter: blur(10px);
   display: none;
-  overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .suggestions div {
   padding: 12px;
   cursor: pointer;
-  transition: 0.2s;
 }
 .suggestions div:hover {
-  background: #333;
+  background: #ff8c42;
+  color: black;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  animation: fadeUp 0.5s ease;
+}
+
+.modal button {
+  margin: 10px;
+  width: 140px;
+  border-radius: 10px;
 }
 
 /* LOADING */
 .loading {
   position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   background: #0f0f14;
@@ -102,7 +141,7 @@ button:hover {
   font-size: 22px;
 }
 
-/* ANIMATION */
+/* ANIM */
 @keyframes fadeUp {
   from {opacity: 0; transform: translateY(20px);}
   to {opacity: 1; transform: translateY(0);}
@@ -112,31 +151,45 @@ button:hover {
 
 <body>
 
+<canvas id="bg"></canvas>
+
 <div class="container">
-  <h1>🔎 Search Anything</h1>
+  <h1>🔥 Search Hub</h1>
 
   <div class="search-box">
-    <input id="search" placeholder="Type something...">
-    <button onclick="searchNow()">→</button>
+    <input id="search" placeholder="🔍 Search anything...">
+    <button onclick="searchNow()">➜</button>
     <div class="suggestions" id="suggestions"></div>
   </div>
 </div>
 
-<div class="loading" id="loading">Loading...</div>
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>Choose action</h3>
+    <button onclick="go('new')">🌐 New Tab</button>
+    <button onclick="go('direct')">➡️ Direct Link</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">⚡ Loading...</div>
 
 <script>
 const input = document.getElementById("search");
 const suggestionsBox = document.getElementById("suggestions");
+let currentQuery = "";
 
+/* SUGGESTIONS */
 input.addEventListener("input", async () => {
   let query = input.value;
+  currentQuery = query;
+
   if (!query) {
     suggestionsBox.style.display = "none";
     return;
   }
 
   try {
-    // Using DuckDuckGo instant suggestions (no API key needed)
     let res = await fetch("https://duckduckgo.com/ac/?q=" + query);
     let data = await res.json();
 
@@ -145,7 +198,7 @@ input.addEventListener("input", async () => {
     data.slice(0,5).forEach(item => {
       let div = document.createElement("div");
       div.textContent = item.phrase;
-      div.onclick = () => goSearch(item.phrase);
+      div.onclick = () => openModal(item.phrase);
       suggestionsBox.appendChild(div);
     });
 
@@ -155,7 +208,7 @@ input.addEventListener("input", async () => {
   }
 });
 
-/* ENTER KEY */
+/* ENTER */
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     searchNow();
@@ -165,16 +218,68 @@ input.addEventListener("keypress", (e) => {
 function searchNow() {
   let query = input.value.trim();
   if (!query) return;
-  goSearch(query);
+  openModal(query);
 }
 
-function goSearch(query) {
+/* MODAL */
+function openModal(query) {
+  currentQuery = query;
+  document.getElementById("modal").style.display = "flex";
+}
+
+/* GO */
+function go(mode) {
+  document.getElementById("modal").style.display = "none";
   document.getElementById("loading").style.display = "flex";
 
   setTimeout(() => {
-    window.location.href = "https://www.google.com/search?q=" + encodeURIComponent(query);
-  }, 700);
+    let url = "https://www.google.com/search?q=" + encodeURIComponent(currentQuery);
+
+    if (mode === "new") {
+      window.open(url, "_blank");
+    } else {
+      window.location.href = url;
+    }
+  }, 800);
 }
+
+/* PARTICLES */
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2,
+    dx: Math.random() - 0.5,
+    dy: Math.random() - 0.5
+  });
+}
+
+function animate() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.dx;
+    p.y += p.dy;
+
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = "#ff8c42";
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
 </script>
 
 </body>
